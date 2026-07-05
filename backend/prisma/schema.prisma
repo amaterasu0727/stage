@@ -1,0 +1,249 @@
+generator client {
+  provider     = "prisma-client-js"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  ADMIN
+  RESPONSABLE_TECHNIQUE
+  TECHNICIEN
+  AGENT
+}
+
+enum StatutTicket {
+  NOUVEAU
+  AFFECTE
+  EN_COURS
+  EN_ATTENTE
+  RESOLU
+  FERME
+}
+
+enum Priorite {
+  CRITIQUE
+  HAUTE
+  NORMALE
+  BASSE
+}
+
+enum StatutIntervention {
+  EN_ATTENTE
+  EN_COURS
+  TERMINEE
+}
+
+enum StatutDemandeReaffectation {
+  EN_ATTENTE
+  ACCEPTEE
+  REFUSEE
+}
+
+model Utilisateur {
+  id           Int      @id @default(autoincrement())
+  nom          String
+  prenom       String
+  email        String   @unique
+  motDePasse   String
+  telephone    String
+  role         Role
+  actif        Boolean  @default(true)
+  disponible   Boolean  @default(false)
+  dateCreation DateTime @default(now())
+
+  serviceId Int
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  ticketsCrees            Ticket[]               @relation("TicketAuteur")
+  interventions           Intervention[]         @relation("InterventionTechnicien")
+  interventionsAffectees  Intervention[]         @relation("InterventionAffectateur")
+  commentaires            Commentaire[]
+  notifications           Notification[]
+  historiques             Historique[]
+  journalActivites        JournalActivite[]
+  demandesReaffectation   DemandeReaffectation[] @relation("DemandeTechnicien")
+  demandesTraitees        DemandeReaffectation[] @relation("DemandeTraitant")
+
+  @@map("utilisateurs")
+}
+
+model Service {
+  id          Int     @id @default(autoincrement())
+  nom         String  @unique
+  description String?
+
+  utilisateurs Utilisateur[]
+  tickets      Ticket[]
+  compteurs    CompteurTicket[]
+
+  @@map("services")
+}
+
+model Categorie {
+  id          Int     @id @default(autoincrement())
+  nom         String  @unique
+  description String?
+
+  tickets Ticket[]
+
+  @@map("categories")
+}
+
+model Ticket {
+  id               Int          @id @default(autoincrement())
+  numero           String       @unique
+  titre            String
+  description      String       @db.Text
+  statut           StatutTicket @default(NOUVEAU)
+  priorite         Priorite?
+  dateCreation     DateTime     @default(now())
+  dateModification DateTime     @updatedAt
+
+  serviceId Int
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  categorieId Int?
+  categorie   Categorie? @relation(fields: [categorieId], references: [id])
+
+  auteurId Int
+  auteur   Utilisateur @relation("TicketAuteur", fields: [auteurId], references: [id])
+
+  interventions Intervention[]
+  commentaires  Commentaire[]
+  piecesJointes PieceJointe[]
+  historiques   Historique[]
+  notifications Notification[]
+
+  @@map("tickets")
+}
+
+model CompteurTicket {
+  id            Int     @id @default(autoincrement())
+  serviceId     Int
+  service       Service @relation(fields: [serviceId], references: [id])
+  annee         Int
+  dernierNumero Int     @default(0)
+
+  @@unique([serviceId, annee])
+  @@map("compteurs_tickets")
+}
+
+model Intervention {
+  id              Int                @id @default(autoincrement())
+  ticketId        Int
+  ticket          Ticket             @relation(fields: [ticketId], references: [id])
+  technicienId    Int
+  technicien      Utilisateur        @relation("InterventionTechnicien", fields: [technicienId], references: [id])
+  affectateurId   Int
+  affectateur     Utilisateur        @relation("InterventionAffectateur", fields: [affectateurId], references: [id])
+  statut          StatutIntervention @default(EN_ATTENTE)
+  accepte         Boolean            @default(false)
+  dateAcceptation DateTime?
+  dateDebut       DateTime?
+  dateFin         DateTime?
+  compteRendu     String?            @db.Text
+  dateCreation    DateTime           @default(now())
+
+  demandesReaffectation DemandeReaffectation[]
+
+  @@map("interventions")
+}
+
+model DemandeReaffectation {
+  id Int @id @default(autoincrement())
+
+  interventionId Int
+  intervention   Intervention @relation(fields: [interventionId], references: [id])
+
+  technicienId Int
+  technicien   Utilisateur @relation("DemandeTechnicien", fields: [technicienId], references: [id])
+
+  motif                  String  @db.Text
+  justificatifNomFichier String?
+  justificatifChemin     String?
+
+  statut StatutDemandeReaffectation @default(EN_ATTENTE)
+
+  traitantId            Int?
+  traitant              Utilisateur? @relation("DemandeTraitant", fields: [traitantId], references: [id])
+  commentaireTraitement String?
+  dateTraitement        DateTime?
+
+  dateCreation DateTime @default(now())
+
+  @@map("demandes_reaffectation")
+}
+
+model PieceJointe {
+  id            Int    @id @default(autoincrement())
+  ticketId      Int
+  ticket        Ticket @relation(fields: [ticketId], references: [id])
+  nomFichier    String
+  cheminFichier String
+  typeFichier   String
+  tailleFichier Int
+
+  dateAjout DateTime @default(now())
+
+  @@map("pieces_jointes")
+}
+
+model Commentaire {
+  id       Int    @id @default(autoincrement())
+  ticketId Int
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+  auteurId Int
+  auteur   Utilisateur @relation(fields: [auteurId], references: [id])
+
+  contenu      String   @db.Text
+  dateCreation DateTime @default(now())
+
+  @@map("commentaires")
+}
+
+model Notification {
+  id             Int         @id @default(autoincrement())
+  destinataireId Int
+  destinataire   Utilisateur @relation(fields: [destinataireId], references: [id])
+
+  ticketId Int?
+  ticket   Ticket? @relation(fields: [ticketId], references: [id])
+
+  titre     String
+  message   String   @db.Text
+  lu        Boolean  @default(false)
+  dateEnvoi DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model Historique {
+  id       Int     @id @default(autoincrement())
+  ticketId Int?
+  ticket   Ticket? @relation(fields: [ticketId], references: [id])
+
+  utilisateurId Int
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+
+  action         String
+  ancienneValeur String?
+  nouvelleValeur String?
+  date           DateTime @default(now())
+
+  @@map("historique")
+}
+
+model JournalActivite {
+  id            Int          @id @default(autoincrement())
+  utilisateurId Int?
+  utilisateur   Utilisateur? @relation(fields: [utilisateurId], references: [id])
+
+  action  String
+  details String?  @db.Text
+  date    DateTime @default(now())
+
+  @@map("journal_activite")
+}
