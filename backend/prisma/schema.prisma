@@ -1,6 +1,7 @@
 generator client {
   provider     = "prisma-client-js"
   moduleFormat = "cjs"
+  binaryTargets = ["windows"]
 }
 
 datasource db {
@@ -58,14 +59,15 @@ model Utilisateur {
   service   Service @relation(fields: [serviceId], references: [id])
 
   ticketsCrees            Ticket[]               @relation("TicketAuteur")
-  interventions           Intervention[]         @relation("InterventionTechnicien")
-  interventionsAffectees  Intervention[]         @relation("InterventionAffectateur")
-  commentaires            Commentaire[]
-  notifications           Notification[]
-  historiques             Historique[]
-  journalActivites        JournalActivite[]
-  demandesReaffectation   DemandeReaffectation[] @relation("DemandeTechnicien")
-  demandesTraitees        DemandeReaffectation[] @relation("DemandeTraitant")
+  interventions            Intervention[]         @relation("InterventionTechnicien")
+  interventionsAffectees   Intervention[]         @relation("InterventionAffectateur")
+  commentaires             Commentaire[]
+  notifications            Notification[]
+  historiques              Historique[]
+  journalActivites         JournalActivite[]
+  demandesReaffectation    DemandeReaffectation[] @relation("DemandeTechnicien")
+  demandesTraitees         DemandeReaffectation[] @relation("DemandeTraitant")
+  sessionTokens            SessionToken[]
 
   @@map("utilisateurs")
 }
@@ -93,14 +95,15 @@ model Categorie {
 }
 
 model Ticket {
-  id               Int          @id @default(autoincrement())
-  numero           String       @unique
-  titre            String
-  description      String       @db.Text
-  statut           StatutTicket @default(NOUVEAU)
-  priorite         Priorite?
-  dateCreation     DateTime     @default(now())
-  dateModification DateTime     @updatedAt
+  id                  Int          @id @default(autoincrement())
+  numero              String       @unique
+  titre               String?
+  description         String       @db.Text
+  statut              StatutTicket @default(NOUVEAU)
+  priorite            Priorite?
+  dateCreation        DateTime     @default(now())
+  dateModification     DateTime     @updatedAt
+  dateLimiteFermeture DateTime?
 
   serviceId Int
   service   Service @relation(fields: [serviceId], references: [id])
@@ -148,6 +151,7 @@ model Intervention {
   dateCreation    DateTime           @default(now())
 
   demandesReaffectation DemandeReaffectation[]
+  commentaires          Commentaire[]
 
   @@map("interventions")
 }
@@ -195,6 +199,10 @@ model Commentaire {
   id       Int    @id @default(autoincrement())
   ticketId Int
   ticket   Ticket @relation(fields: [ticketId], references: [id])
+
+  interventionId Int?
+  intervention   Intervention? @relation(fields: [interventionId], references: [id])
+
   auteurId Int
   auteur   Utilisateur @relation(fields: [auteurId], references: [id])
 
@@ -225,8 +233,8 @@ model Historique {
   ticketId Int?
   ticket   Ticket? @relation(fields: [ticketId], references: [id])
 
-  utilisateurId Int
-  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+  utilisateurId Int?
+  utilisateur   Utilisateur? @relation(fields: [utilisateurId], references: [id])
 
   action         String
   ancienneValeur String?
@@ -246,4 +254,16 @@ model JournalActivite {
   date    DateTime @default(now())
 
   @@map("journal_activite")
+}
+
+model SessionToken {
+  id             Int         @id @default(autoincrement())
+  jti            String      @unique
+  utilisateurId  Int
+  utilisateur    Utilisateur @relation(fields: [utilisateurId], references: [id])
+  dateCreation   DateTime    @default(now())
+  dateExpiration DateTime
+  revoque        Boolean     @default(false)
+
+  @@map("session_tokens")
 }
