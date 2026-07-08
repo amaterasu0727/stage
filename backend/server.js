@@ -30,7 +30,9 @@ app.get('/api/status', async (req, res) => {
     });
   }
 });
+const { demarrerTacheFermetureAutomatique } = require('./jobs/fermetureAutomatique');
 
+demarrerTacheFermetureAutomatique();
 app.listen(PORT, () => {
   console.log(`=== SERVEUR DEMARRE ===`);
   console.log(`URL : http://localhost:${PORT}`);
@@ -43,3 +45,20 @@ const categorieRoutes = require('./routes/categorie.routes');
 app.use('/api/utilisateurs', utilisateurRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/categories', categorieRoutes);
+const ticketRoutes = require('./routes/ticket.routes');
+app.use('/api/tickets', ticketRoutes);
+const interventionRoutes = require('./routes/intervention.routes');
+app.use('/api/interventions', interventionRoutes);
+const demandeReaffectationRoutes = require('./routes/demandeReaffectation.routes');
+app.use('/api/demandes-reaffectation', demandeReaffectationRoutes);
+const pieceJointeRoutes = require('./routes/pieceJointe.routes');
+app.use('/api/pieces-jointes', pieceJointeRoutes);
+const notificationRoutes = require('./routes/notification.routes');
+app.use('/api/notifications', notificationRoutes);
+const dashboardRoutes = require('./routes/dashboard.routes');
+const exportRoutes = require('./routes/export.routes');
+const journalActiviteRoutes = require('./routes/journalActivite.routes');
+
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/exports', exportRoutes);
+app.use('/api/journal-activite', journalActiviteRoutes);
