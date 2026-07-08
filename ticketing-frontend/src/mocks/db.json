@@ -1,0 +1,47 @@
+{
+  "tickets": [
+    {
+      "id": 1,
+      "titre": "Imprimante HS bureau 204",
+      "description": "L'imprimante n'imprime plus depuis ce matin, message d'erreur bourrage papier.",
+      "statut": "nouveau",
+      "priorite": "medium",
+      "categorie": "materiel",
+      "demandeur": "Awa Sossou",
+      "assigneA": null,
+      "dateCreation": "2026-07-01T08:30:00Z",
+      "commentaires": []
+    },
+    {
+      "id": 2,
+      "titre": "Impossible de se connecter au VPN",
+      "description": "Erreur d'authentification depuis hier soir, urgent car télétravail.",
+      "statut": "en_cours",
+      "priorite": "urgent",
+      "categorie": "reseau",
+      "demandeur": "Kevin Adjovi",
+      "assigneA": "Marc Techos",
+      "dateCreation": "2026-06-30T17:00:00Z",
+      "commentaires": [
+        { "auteur": "Marc Techos", "texte": "Je regarde ça tout de suite.", "date": "2026-07-01T07:00:00Z" }
+      ]
+    },
+    {
+      "id": 3,
+      "titre": "Demande d'installation logiciel comptabilité",
+      "description": "Besoin d'installer le nouveau logiciel de compta sur mon poste.",
+      "statut": "resolu",
+      "priorite": "low",
+      "categorie": "logiciel",
+      "demandeur": "Fatou Bello",
+      "assigneA": "Marc Techos",
+      "dateCreation": "2026-06-28T09:00:00Z",
+      "commentaires": []
+    }
+  ],
+  "users": [
+    { "id": 1, "nom": "Awa Sossou", "email": "awa@example.com", "role": "user", "password": "demo123" },
+    { "id": 2, "nom": "Marc Techos", "email": "marc@example.com", "role": "agent", "password": "demo123" },
+    { "id": 3, "nom": "Admin Principal", "email": "admin@example.com", "role": "admin", "password": "demo123" }
+  ]
+}
