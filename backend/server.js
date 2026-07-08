@@ -36,3 +36,10 @@ app.listen(PORT, () => {
   console.log(`URL : http://localhost:${PORT}`);
   console.log(`Environnement : ${process.env.NODE_ENV || 'development'}`);
 });
+const utilisateurRoutes = require('./routes/utilisateur.routes');
+const serviceRoutes = require('./routes/service.routes');
+const categorieRoutes = require('./routes/categorie.routes');
+
+app.use('/api/utilisateurs', utilisateurRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/categories', categorieRoutes);
