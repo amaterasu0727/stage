@@ -62,3 +62,7 @@ const journalActiviteRoutes = require('./routes/journalActivite.routes');
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/exports', exportRoutes);
 app.use('/api/journal-activite', journalActiviteRoutes);
+const { gestionnaireNotFound, gestionnaireErreurs } = require('./middlewares/erreur.middleware');
+
+app.use(gestionnaireNotFound);
+app.use(gestionnaireErreurs);

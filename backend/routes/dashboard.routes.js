@@ -1,12 +1,13 @@
 const express = require('express');
 const routeur = express.Router();
-const controleur = require('../controllers/export.controller');
+const controleur = require('../controllers/dashboard.controller');
 const { authentifier, autoriser } = require('../middlewares/auth.middleware');
 
 routeur.use(authentifier);
-routeur.use(autoriser('RESPONSABLE_TECHNIQUE'));
 
-routeur.get('/tickets/pdf', controleur.exporterPdf);
-routeur.get('/tickets/excel', controleur.exporterExcel);
+routeur.get('/agent', autoriser('AGENT'), controleur.agent);
+routeur.get('/technicien', autoriser('TECHNICIEN'), controleur.technicien);
+routeur.get('/responsable', autoriser('RESPONSABLE_TECHNIQUE'), controleur.responsable);
+routeur.get('/admin', autoriser('ADMIN'), controleur.admin);
 
 module.exports = routeur;
